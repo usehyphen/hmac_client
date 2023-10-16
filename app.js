@@ -10,7 +10,7 @@ const calculateHMAC = (route, timestamp, body) => {
     const data = `${route}-${timestamp}-${stringifiedBody}`;
     const hmac = crypto.createHmac('sha256', SECRET_KEY);
     hmac.update(data);
-    const hmacSignature = hmac.digest('hex');
+    const hmacSignature = hmac.digest('base64');
     return hmacSignature;
 }
 
@@ -20,15 +20,15 @@ async function makeAuthenticatedGetRequest() {
     const route = '/secured_route';
     const url = `${SERVER_URL}${route}`;
 
-    const timestamp = new Date().getTime();
+    const timestampInSeconds = Math.floor(new Date().getTime() / 1000);
 
     // Create the HMAC signature for the request
-    const hmacSignature = calculateHMAC(route, timestamp);
+    const hmacSignature = calculateHMAC(route, timestampInSeconds);
 
     // Set the HMAC signature in the request headers as well as the timestamp used in it
     const headers = {
-        'x-hmac': hmacSignature,
-        'x-timestamp': timestamp
+        'X-Authorization': hmacSignature,
+        'X-Authorization-Timestamp': timestampInSeconds
     };
 
     try {
@@ -48,19 +48,19 @@ async function makeAuthenticatedPostRequest() {
     const route = '/secured_route_w_body';
     const url = `${SERVER_URL}${route}`;
 
-    const timestamp = new Date().getTime();
+    const timestampInSeconds = Math.floor(new Date().getTime() / 1000);
 
     const body = {
         orderitem_id: "8675309"
     }
 
     // Create the HMAC signature for the request
-    const hmacSignature = calculateHMAC(route, timestamp, body);
+    const hmacSignature = calculateHMAC(route, timestampInSeconds, body);
 
     // Set the HMAC signature in the request headers as well as the timestamp used in it
     const headers = {
-        'x-hmac': hmacSignature,
-        'x-timestamp': timestamp
+        'X-Authorization': hmacSignature,
+        'X-Authorization-Timestamp': timestampInSeconds
     };
 
     try {
