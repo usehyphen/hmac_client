@@ -33,7 +33,8 @@ async function makeAuthenticatedGetRequest() {
 
     try {
     const response = await axios.get(url, { headers });
-    console.log('Response:', response.data);
+    console.log('Status:', response.status);
+    console.log('Data:', response.data);
     } catch (error) {
         console.error('Error Message:', error.message);
         console.error('status:', error.response.status);
@@ -43,7 +44,42 @@ async function makeAuthenticatedGetRequest() {
 }
 
 // Make secured GET request
-makeAuthenticatedGetRequest();
+// makeAuthenticatedGetRequest();
+
+
+async function makeAuthenticatedPostRequest() {
+    // Construct the URL for the POST request
+    const route = '/lift/up';
+    const url = `${SERVER_URL}${route}`;
+
+    const timestampInSeconds = Math.floor(new Date().getTime() / 1000);
+
+    const body = null
+
+    // Create the HMAC signature for the request
+    const hmacSignature = calculateHMAC(route, timestampInSeconds, body);
+
+    // Set the HMAC signature in the request headers as well as the timestamp used in it
+    const headers = {
+        'X-Authorization': hmacSignature,
+        'X-Authorization-Timestamp': timestampInSeconds
+    };
+
+    try {
+    const response = await axios.post(url, body, { headers });
+    console.log('Status:', response.status);
+    console.log('Data:', response.data);
+    } catch (error) {
+    console.error('Error Message:', error.message);
+    console.error('status:', error.response.status);
+    console.error('statusText:', error.response.statusText);
+    console.error('data:', error.response.data);
+    }
+}
+
+// Make secured POST request with no body
+makeAuthenticatedPostRequest();
+
 
 // Function to make an HMAC-authenticated POST request
 // async function makeAuthenticatedPostRequest() {
@@ -68,7 +104,8 @@ makeAuthenticatedGetRequest();
 
 //     try {
 //     const response = await axios.post(url, body, { headers });
-//     console.log('Response:', response.data);
+//     console.log('Status:', response.status);
+//     console.log('Data:', response.data);
 //     } catch (error) {
 //     console.error('Error Message:', error.message);
 //     console.error('status:', error.response.status);
@@ -77,5 +114,5 @@ makeAuthenticatedGetRequest();
 //     }
 // }
 
-// Make secured POST request
+// Make secured POST request with body
 // makeAuthenticatedPostRequest();
