@@ -1,5 +1,6 @@
 const axios = require('axios');
 const crypto = require('crypto');
+const args = process.argv.slice(2);
 
 // Secret key for HMAC
 const SECRET_KEY = 'test_secret_key';
@@ -46,9 +47,6 @@ async function makeGetHealthRequest() {
     }
 }
 
-// Make secured GET request
-// makeGetHealthRequest();
-
 async function makeGetStateRequest() {
     // Construct the URL for the GET request
     const route = '/state';
@@ -79,9 +77,6 @@ async function makeGetStateRequest() {
         console.error('data:', error.response.data);
     }
 }
-
-// Make secured GET request
-// makeGetStateRequest();
 
 async function makeGetAllEntreesRequest() {
     // Construct the URL for the GET request
@@ -114,12 +109,9 @@ async function makeGetAllEntreesRequest() {
     }
 }
 
-// Make secured GET request
-// makeGetAllEntreesRequest();
-
-async function makeGetEntreeRequest() {
+async function makeGetEntreeRequest(entreeId) {
     // Construct the URL for the GET request
-    const route = '/entree/153b9357-5bcd-4be8-873e-04f71dcb3ad1';
+    const route = `/entree/${entreeId}`;
     const url = `${SERVER_URL}${route}`;
 
     const timestampInSeconds = Math.floor(new Date().getTime() / 1000);
@@ -149,35 +141,12 @@ async function makeGetEntreeRequest() {
     }
 }
 
-// Make secured GET request
-// makeGetEntreeRequest();
-
-async function makeEntreeSubmitRequest() {
+async function makeEntreeSubmitRequest(body) {
     // Construct the URL for the POST request
     const route = '/entree/submit';
     const url = `${SERVER_URL}${route}`;
 
     const timestampInSeconds = Math.floor(new Date().getTime() / 1000);
-
-    const body = {
-        externalOrderId: "12345",
-        externalRecipeId: "23456",
-        externalEntreeId: "34567",
-        name: {
-            full: "Chicken Bowl"
-        },
-        customerName: "Keith Warter",
-        promiseTimeMs: 1669114118000,
-        ingredients: [
-            {
-                externalIngredientId: "45678",
-                name: {
-                    full: "Amazing Chicken"
-                },
-                multiplier: 1,
-            }
-        ]
-    }
 
     // Create the HMAC signature for the request
     const hmacSignature = calculateHMAC(route, timestampInSeconds, body);
@@ -203,12 +172,9 @@ async function makeEntreeSubmitRequest() {
     }
 }
 
-// Make secured POST request
-// makeEntreeSubmitRequest();
-
-async function makeEntreeCancelRequest() {
+async function makeEntreeCancelRequest(entreeId) {
     // Construct the URL for the POST request
-    const route = '/entree/dc2605e6-ff9b-4091-9bbf-6b18c24b9d67/cancel';
+    const route = `/entree/${entreeId}/cancel`;
     const url = `${SERVER_URL}${route}`;
 
     const timestampInSeconds = Math.floor(new Date().getTime() / 1000);
@@ -238,9 +204,6 @@ async function makeEntreeCancelRequest() {
     console.error('data:', error.response.data);
     }
 }
-
-// Make secured POST request
-// makeEntreeCancelRequest();
 
 async function makePowerOnRequest() {
     // Construct the URL for the POST request
@@ -275,9 +238,6 @@ async function makePowerOnRequest() {
     }
 }
 
-// Make secured POST request
-// makePowerOnRequest();
-
 async function makePowerOffRequest() {
     // Construct the URL for the POST request
     const route = '/state/power-off';
@@ -310,9 +270,6 @@ async function makePowerOffRequest() {
     console.error('data:', error.response.data);
     }
 }
-
-// Make secured POST request
-// makePowerOffRequest();
 
 async function makePauseRequest() {
     // Construct the URL for the POST request
@@ -347,9 +304,6 @@ async function makePauseRequest() {
     }
 }
 
-// Make secured POST request
-// makePauseRequest();
-
 async function makeResumeRequest() {
     // Construct the URL for the POST request
     const route = '/state/resume';
@@ -382,9 +336,6 @@ async function makeResumeRequest() {
     console.error('data:', error.response.data);
     }
 }
-
-// Make secured POST request
-// makeResumeRequest();
 
 async function makeLiftRiseRequest() {
     // Construct the URL for the POST request
@@ -419,9 +370,6 @@ async function makeLiftRiseRequest() {
     }
 }
 
-// Make secured POST request
-// makeLiftRiseRequest();
-
 async function makeGetHvacRequest() {
     // Construct the URL for the GET request
     const route = '/hvac';
@@ -453,9 +401,6 @@ async function makeGetHvacRequest() {
         console.error('data:', error.response.data);
     }
 }
-
-// Make secured GET request
-// makeGetHvacRequest();
 
 async function makeGetFaultsRequest() {
     // Construct the URL for the GET request
@@ -489,9 +434,6 @@ async function makeGetFaultsRequest() {
     }
 }
 
-// Make secured GET request
-// makeGetFaultsRequest();
-
 async function makeGetHoppersRequest() {
     // Construct the URL for the GET request
     const route = '/hoppers';
@@ -523,9 +465,6 @@ async function makeGetHoppersRequest() {
         console.error('data:', error.response.data);
     }
 }
-
-// Make secured GET request
-// makeGetHoppersRequest();
 
 async function makeDenesterRequest() {
     // Construct the URL for the GET request
@@ -559,5 +498,73 @@ async function makeDenesterRequest() {
     }
 }
 
-// Make secured GET request
-makeDenesterRequest();
+const entreeId = args[1] || "<entreeId>"
+const entree = {
+    externalOrderId: "12345",
+    externalRecipeId: "23456",
+    externalEntreeId: "34567",
+    name: {
+        full: "Chicken Bowl"
+    },
+    customerName: "Keith Warter",
+    promiseTimeMs: 1669114118000,
+    ingredients: [
+        {
+            externalIngredientId: "45678",
+            name: {
+                full: "Amazing Chicken"
+            },
+            multiplier: 1,
+        }
+    ]
+}
+
+switch (args[0]) {
+    case 'health':
+        makeGetHealthRequest();
+        break;
+    case 'state':
+        makeGetStateRequest();
+        break;
+    case 'entrees':
+        makeGetAllEntreesRequest();
+        break;
+    case 'entree':
+        makeGetEntreeRequest(entreeId);
+        break;
+    case 'submit':
+        makeEntreeSubmitRequest(entree);
+        break;
+    case 'cancel':
+        makeEntreeCancelRequest(entreeId);
+        break;
+    case 'on':
+        makePowerOnRequest();
+        break;
+    case 'off':
+        makePowerOffRequest();
+        break;
+    case 'pause':
+        makePauseRequest();
+        break;
+    case 'resume':
+        makeResumeRequest();
+        break;
+    case 'lift':
+        makeLiftRiseRequest();
+        break;
+    case 'hvac':
+        makeGetHvacRequest();
+        break;
+    case 'faults':
+        makeGetFaultsRequest();
+        break;
+    case 'hoppers':
+        makeGetHoppersRequest();
+        break;
+    case 'denester':
+        makeDenesterRequest();
+        break;
+    default:
+      console.log('Unknown endpoint command');
+  }
