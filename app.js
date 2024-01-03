@@ -5,7 +5,7 @@ const args = process.argv.slice(2);
 // Secret key for HMAC
 const SECRET_KEY = 'test_secret_key';
 // const SERVER_URL = 'http://192.168.1.99:8675';
-const SERVER_URL = 'http://localhost:8675';
+const SERVER_URL = 'http://0.0.0.0:8675';
 
 const calculateHMAC = (route, timestamp, body) => {
     const stringifiedBody = body ? JSON.stringify(body) : "";
@@ -498,6 +498,31 @@ async function makeDenesterRequest() {
     }
 }
 
+async function willRequest() {
+    // Construct the URL for the POST request
+    const route = '/command/submit';
+    const url = `${SERVER_URL}${route}`;
+
+    const body = {
+        entreeId: "12345",
+        commands: ['my/command/script.rs']
+    };
+
+    try {
+    console.time("My Call")
+    const response = await axios.post(url, body);
+    console.timeEnd("My Call")
+    console.log('Status:', response.status);
+    console.log('Data:', response.data);
+    } catch (error) {
+    console.timeEnd("My Call")
+    console.error('Error Message:', error.message);
+    console.error('status:', error.response.status);
+    console.error('statusText:', error.response.statusText);
+    console.error('data:', error.response.data);
+    }
+}
+
 const entreeId = args[1] || "<entreeId>"
 const entree = {
     externalOrderId: "12345",
@@ -564,6 +589,9 @@ switch (args[0]) {
         break;
     case 'denester':
         makeDenesterRequest();
+        break;
+    case 'will':
+        willRequest();
         break;
     default:
       console.log('Unknown endpoint command');
