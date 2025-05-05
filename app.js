@@ -1,10 +1,12 @@
 const axios = require('axios');
 const crypto = require('crypto');
+const https = require('https');
 const args = process.argv.slice(2);
 
 // Secret key for HMAC
 const SECRET_KEY = 'test_secret_key';
 // const SERVER_URL = 'http://192.168.1.99:8675';
+// const SERVER_URL = 'https://hyphen.chipotle.esc:8675';
 const SERVER_URL = 'http://localhost:8675';
 
 const calculateHMAC = (route, timestamp, body) => {
@@ -35,7 +37,10 @@ async function makeGetHealthRequest() {
 
     try {
     console.time("My Call")
-    const response = await axios.get(url, { headers });
+    const agent = new https.Agent({  
+        rejectUnauthorized: false
+      });
+    const response = await axios.get(url, { headers, httpsAgent: agent });
     console.timeEnd("My Call")
     console.log('Status:', response.status);
     console.log('Data:', response.data);
@@ -66,7 +71,10 @@ async function makeGetStateRequest() {
 
     try {
     console.time("My Call")
-    const response = await axios.get(url, { headers });
+    const agent = new https.Agent({  
+        rejectUnauthorized: false
+      });
+    const response = await axios.get(url, { headers, httpsAgent: agent });
     console.timeEnd("My Call")
     console.log('Status:', response.status);
     console.log('Data:', response.data);
@@ -226,7 +234,10 @@ async function makePowerOnRequest() {
 
     try {
     console.time("My Call")
-    const response = await axios.post(url, body, { headers });
+    const agent = new https.Agent({  
+        rejectUnauthorized: false
+      });
+    const response = await axios.post(url, body, { headers, httpsAgent: agent });
     console.timeEnd("My Call")
     console.log('Status:', response.status);
     console.log('Data:', response.data);
@@ -305,7 +316,38 @@ async function makeSkipRequest() {
     }
 }
 
+async function makeStartComponentCheckRequest() {
+    // Construct the URL for the POST request
+    const route = '/component-install/start'
+    const url = `${SERVER_URL}${route}`;
 
+    const timestampInSeconds = Math.floor(new Date().getTime() / 1000);
+
+    const body = null
+
+    // Create the HMAC signature for the request
+    const hmacSignature = calculateHMAC(route, timestampInSeconds, body);
+
+    // Set the HMAC signature in the request headers as well as the timestamp used in it
+    const headers = {
+        'X-Authorization': hmacSignature,
+        'X-Authorization-Timestamp': timestampInSeconds
+    };
+
+    try {
+    console.time("My Call")
+    const response = await axios.post(url, body, { headers });
+    console.timeEnd("My Call")
+    console.log('Status:', response.status);
+    console.log('Data:', response.data);
+    } catch (error) {
+    console.timeEnd("My Call")
+    console.error('Error Message:', error.message);
+    console.error('status:', error.response.status);
+    console.error('statusText:', error.response.statusText);
+    console.error('data:', error.response.data);
+    }
+}
 
 async function makeShutdownRequest() {
     // Construct the URL for the POST request
@@ -439,6 +481,72 @@ async function makeResumeRequest() {
     }
 }
 
+async function makeHardResetRequest() {
+    // Construct the URL for the POST request
+    const route = '/state/hard-reset';
+    const url = `${SERVER_URL}${route}`;
+
+    const timestampInSeconds = Math.floor(new Date().getTime() / 1000);
+
+    const body = null
+
+    // Create the HMAC signature for the request
+    const hmacSignature = calculateHMAC(route, timestampInSeconds, body);
+
+    // Set the HMAC signature in the request headers as well as the timestamp used in it
+    const headers = {
+        'X-Authorization': hmacSignature,
+        'X-Authorization-Timestamp': timestampInSeconds
+    };
+
+    try {
+    console.time("My Call")
+    const response = await axios.post(url, body, { headers });
+    console.timeEnd("My Call")
+    console.log('Status:', response.status);
+    console.log('Data:', response.data);
+    } catch (error) {
+    console.timeEnd("My Call")
+    console.error('Error Message:', error.message);
+    console.error('status:', error.response.status);
+    console.error('statusText:', error.response.statusText);
+    console.error('data:', error.response.data);
+    }
+}
+
+async function makeManualModeRequest() {
+    // Construct the URL for the POST request
+    const route = '/state/manual-mode';
+    const url = `${SERVER_URL}${route}`;
+
+    const timestampInSeconds = Math.floor(new Date().getTime() / 1000);
+
+    const body = null
+
+    // Create the HMAC signature for the request
+    const hmacSignature = calculateHMAC(route, timestampInSeconds, body);
+
+    // Set the HMAC signature in the request headers as well as the timestamp used in it
+    const headers = {
+        'X-Authorization': hmacSignature,
+        'X-Authorization-Timestamp': timestampInSeconds
+    };
+
+    try {
+    console.time("My Call")
+    const response = await axios.post(url, body, { headers });
+    console.timeEnd("My Call")
+    console.log('Status:', response.status);
+    console.log('Data:', response.data);
+    } catch (error) {
+    console.timeEnd("My Call")
+    console.error('Error Message:', error.message);
+    console.error('status:', error.response.status);
+    console.error('statusText:', error.response.statusText);
+    console.error('data:', error.response.data);
+    }
+}
+
 async function makeLiftRiseRequest() {
     // Construct the URL for the POST request
     const route = '/lift/up';
@@ -536,9 +644,9 @@ async function makeGetFaultsRequest() {
     }
 }
 
-async function makeGetHoppersRequest() {
+async function makeGetDispensersRequest() {
     // Construct the URL for the GET request
-    const route = '/hoppers';
+    const route = '/dispensers';
     const url = `${SERVER_URL}${route}`;
 
     const timestampInSeconds = Math.floor(new Date().getTime() / 1000);
@@ -554,7 +662,10 @@ async function makeGetHoppersRequest() {
 
     try {
     console.time("My Call")
-    const response = await axios.get(url, { headers });
+    const agent = new https.Agent({  
+        rejectUnauthorized: false
+      });
+    const response = await axios.get(url, { headers, httpsAgent: agent });
     console.timeEnd("My Call")
     console.log('Status:', response.status);
     console.log('Data:');
@@ -600,75 +711,223 @@ async function makeDenesterRequest() {
     }
 }
 
+async function makeloadinRequest() {
+    // Construct the URL for the GET request
+    const route = '/component-install/all';
+    const url = `${SERVER_URL}${route}`;
+
+    const timestampInSeconds = Math.floor(new Date().getTime() / 1000);
+
+    // Create the HMAC signature for the request
+    const hmacSignature = calculateHMAC(route, timestampInSeconds);
+
+    // Set the HMAC signature in the request headers as well as the timestamp used in it
+    const headers = {
+        'X-Authorization': hmacSignature,
+        'X-Authorization-Timestamp': timestampInSeconds
+    };
+
+    try {
+    console.time("My Call")
+    const response = await axios.get(url, { headers });
+    console.timeEnd("My Call")
+    console.log('Status:', response.status);
+    console.log('Data:');
+    console.dir(response.data, { depth: null })
+    } catch (error) {
+        console.timeEnd("My Call")
+        console.error('Error Message:', error.message);
+        console.error('status:', error.response.status);
+        console.error('statusText:', error.response.statusText);
+        console.error('data:', error.response.data);
+    }
+}
+
+async function makeGordieRequest() {
+    // Construct the URL for the GET request
+    const route = '/gordie';
+    const url = `${SERVER_URL}${route}`;
+    const body = {"namse": "Gordie"}
+
+    const timestampInSeconds = Math.floor(new Date().getTime() / 1000);
+
+
+    // Create the HMAC signature for the request
+    const hmacSignature = calculateHMAC(route, timestampInSeconds, body);
+
+    // Set the HMAC signature in the request headers as well as the timestamp used in it
+    const headers = {
+        'X-Authorization': hmacSignature,
+        'X-Authorization-Timestamp': timestampInSeconds
+    };
+
+    try {
+    console.time("My Call")
+    const response = await axios.post(url, body, { headers });
+    console.timeEnd("My Call")
+    console.log('Status:', response.status);
+    console.log('Data:');
+    console.dir(response.data, { depth: null })
+    } catch (error) {
+        console.timeEnd("My Call")
+        console.error('Error Message:', error.message);
+        console.error('status:', error.response.status);
+        console.error('statusText:', error.response.statusText);
+        console.error('data:', error.response.data);
+    }
+}
+
 const entreeId = args[1] || "<entreeId>"
 const entree = {
-    "externalOrderId": "08eba8a1-8a14-4a74-b429-6d9ad3db427e",
+    "externalOrderId": "external-id",
     "externalRecipeId": "tempid",
     "externalEntreeId": "38dd1cb6-838a-4f8a-8b71-bbea56a2d588",
     "name": {
         "full": "Chicken Salad"
     },
-    "customerName": "Patricia - Chkn Salad",
+    "customerName": "Gordie White",
     "promiseTimeMs": 1710263384000,
     "ingredients": [
         {
-            "externalIngredientId": "II-CHICKEN",
+            "name": {
+                "full": "II-WHITE-RICE"
+            },
+            "externalIngredientId": "II-WHITE-RICE",
+            "multiplier": 1
+        },
+    ]
+}
+
+const entreeBugTest = {
+    "externalOrderId": "558da4af-ef95-4932-be8a-4dd18f961b34",
+    "externalRecipeId": "tempid",
+    "externalEntreeId": "408cb97a-ec84-4038-b169-1628b12ccf06",
+    "name": {
+        "full": "Chicken Salad"
+    },
+    "customerName": "Gordie White",
+    "promiseTimeMs": 1710263384000,
+    "ingredients": [
+        {
             "name": {
                 "full": "II-CHICKEN"
             },
+            "externalIngredientId": "II-CHICKEN",
             "multiplier": 1.0
         },
         {
-            "externalIngredientId": "II-PINTO-BEANS",
             "name": {
-                "full": "II-PINTO-BEANS"
+                "full": "II-SALAD-LETTUCE"
             },
+            "externalIngredientId": "II-SALAD-LETTUCE",
             "multiplier": 1.0
         },
         {
-            "externalIngredientId": "II-BROWN-RICE",
             "name": {
                 "full": "II-BROWN-RICE"
             },
-            "multiplier": 1.0
+            "externalIngredientId": "II-BROWN-RICE",
+            "multiplier": 0.5
         },
         {
-            "externalIngredientId": "II-GREEN-CHILI-SALSA",
             "name": {
-                "full": "II-GREEN-CHILI-SALSA"
+                "full": "II-WHITE-RICE"
             },
-            "multiplier": 1.0
+            "externalIngredientId": "II-WHITE-RICE",
+            "multiplier": 0.5
         },
         {
-            "externalIngredientId": "II-SOUR-CREAM",
             "name": {
-                "full": "II-SOUR-CREAM"
+                "full": "II-TOMATO-SALSA"
             },
-            "multiplier": 1.0
+            "externalIngredientId": "II-TOMATO-SALSA",
+            "multiplier": 0.5
         },
         {
-            "externalIngredientId": "II-CHEESE",
-            "name": {
-                "full": "II-CHEESE"
-            },
-            "multiplier": 1.0
-        },
-        {
-            "externalIngredientId": "II-RED-CHILI-SALSA",
-            "name": {
-                "full": "II-RED-CHILI-SALSA"
-            },
-            "multiplier": 1.0
-        },
-        {
-            "externalIngredientId": "II-FAJITA-VEGGIES",
             "name": {
                 "full": "II-FAJITA-VEGGIES"
             },
+            "externalIngredientId": "II-FAJITA-VEGGIES",
+            "multiplier": 2.0
+        },
+        {
+            "name": {
+                "full": "II-STEAK"
+            },
+            "externalIngredientId": "II-STEAK",
             "multiplier": 1.0
         }
     ]
-} 
+}
+
+const entrees = [
+    {
+        "externalOrderId": "external-id-A",
+        "externalRecipeId": "tempid",
+        "externalEntreeId": "A1",
+        "name": {
+            "full": "Chicken Salad A1"
+        },
+        "customerName": "Gordie White",
+        "promiseTimeMs": 1710263384000,
+        "ingredients": []
+    },
+    {
+        "externalOrderId": "external-id-A",
+        "externalRecipeId": "tempid",
+        "externalEntreeId": "A2",
+        "name": {
+            "full": "Chicken Salad A2"
+        },
+        "customerName": "Gordie White",
+        "promiseTimeMs": 1710263384000,
+        "ingredients": []
+    },
+    {
+        "externalOrderId": "external-id-A",
+        "externalRecipeId": "tempid",
+        "externalEntreeId": "A3",
+        "name": {
+            "full": "Chicken Salad A3"
+        },
+        "customerName": "Gordie White",
+        "promiseTimeMs": 1710263384000,
+        "ingredients": []
+    },
+    {
+        "externalOrderId": "external-id-B",
+        "externalRecipeId": "tempid",
+        "externalEntreeId": "B1",
+        "name": {
+            "full": "Chicken Salad B1"
+        },
+        "customerName": "Gordie White",
+        "promiseTimeMs": 1710263385000,
+        "ingredients": []
+    },
+    {
+        "externalOrderId": "external-id-B",
+        "externalRecipeId": "tempid",
+        "externalEntreeId": "B2",
+        "name": {
+            "full": "Chicken Salad B2"
+        },
+        "customerName": "Gordie White",
+        "promiseTimeMs": 1710263385000,
+        "ingredients": []
+    },
+    {
+        "externalOrderId": "external-id-B",
+        "externalRecipeId": "tempid",
+        "externalEntreeId": "B3",
+        "name": {
+            "full": "Chicken Salad B3"
+        },
+        "customerName": "Gordie White",
+        "promiseTimeMs": 1710263384000,
+        "ingredients": []
+    }
+]
 
 switch (args[0]) {
     case 'health':
@@ -686,14 +945,25 @@ switch (args[0]) {
     case 'submit':
         makeEntreeSubmitRequest(entree);
         break;
+    case 'submitmultiple':
+        async function submitMultipleEntrees() {
+            for (const entree of entrees) {
+                await makeEntreeSubmitRequest(entree);
+            }
+        }
+        submitMultipleEntrees();
+        break;
     case 'cancel':
-        makeEntreeCancelRequest(entreeId);
+        makeEntreeCancelRequest("68703288-e83d-4103-bd0b-353ad2e73876");
         break;
     case 'on':
         makePowerOnRequest();
         break;
     case 'skip':
         makeSkipRequest();
+        break;
+    case 'startComponentCheck':
+        makeStartComponentCheckRequest();
         break;
     case 'start':
         makeStartMakelineRequest();
@@ -710,6 +980,12 @@ switch (args[0]) {
     case 'resume':
         makeResumeRequest();
         break;
+    case 'manualmode':
+        makeManualModeRequest();
+        break;
+    case 'hardreset':
+        makeHardResetRequest();
+        break;
     case 'lift':
         makeLiftRiseRequest();
         break;
@@ -719,11 +995,17 @@ switch (args[0]) {
     case 'faults':
         makeGetFaultsRequest();
         break;
-    case 'hoppers':
-        makeGetHoppersRequest();
+    case 'dispensers':
+        makeGetDispensersRequest();
         break;
     case 'denester':
         makeDenesterRequest();
+        break;
+    case 'requestloadin':
+        makeloadinRequest();
+        break;
+    case 'gordie':
+        makeGordieRequest();
         break;
     default:
       console.log('Unknown endpoint command');
